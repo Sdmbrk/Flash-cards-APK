@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0b1220">
+<title>Learn Cards</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0b1220;--panel:#16213a;--panel2:#1e2b4a;--txt:#f1f5f9;--mut:#94a3b8;--acc:#22d3ee;--ok:#16a34a;--no:#dc2626;--blue:#2563eb}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+#app{max-width:480px;margin:0 auto;padding:max(28px,env(safe-area-inset-top)) 18px max(24px,env(safe-area-inset-bottom))}
+h1{font-size:26px;margin:4px 0 14px}
+h2{font-size:20px;margin:4px 0 4px}
+small,.mut{color:var(--mut)}
+a{color:inherit;text-decoration:none}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.back{font-size:15px;color:var(--acc)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.stats div{background:var(--panel);border-radius:14px;padding:12px 8px;text-align:center}
+.stats b{display:block;font-size:20px}.stats span{font-size:12px;color:var(--mut)}
+.deck{display:flex;gap:14px;align-items:center;background:var(--panel);border-radius:16px;padding:14px;margin-bottom:12px}
+.deck .ic{font-size:30px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--panel2);border-radius:12px}
+.deck>div{flex:1;min-width:0}
+.bar{height:6px;background:var(--panel2);border-radius:4px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:4px}
+.card{min-height:230px;background:var(--panel);border-radius:20px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:22px;line-height:1.35;cursor:pointer;box-shadow:0 10px 30px #0007;user-select:none;margin:10px 0 16px}
+.card small{font-size:11px;letter-spacing:2px;margin-bottom:12px}
+.card.back{background:#0e3a46;border:1px solid var(--acc)}
+.row{display:flex;gap:12px;margin-top:12px}
+button{flex:1;padding:15px;border:0;border-radius:14px;font-size:16px;font-weight:600;color:#fff;background:var(--blue)}
+button.ok{background:var(--ok)}button.no{background:var(--no)}button.ghost{background:var(--panel2)}
+button:active{opacity:.8}
+.opt{display:block;width:100%;text-align:left;background:var(--panel);margin-bottom:10px;font-weight:500}
+.opt.good{background:var(--ok)}.opt.bad{background:var(--no)}
+.q{font-size:21px;margin:8px 0 18px;line-height:1.35}
+.prog{color:var(--mut);margin-bottom:6px;font-size:14px}
+.big{font-size:56px;text-align:center;margin:20px 0 6px}
+.center{text-align:center}
+.item{display:flex;gap:10px;align-items:center;background:var(--panel);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.item>div{flex:1;min-width:0;overflow-wrap:anywhere}
+.item button{flex:0 0 40px;padding:8px;background:var(--panel2);color:#f87171}
+input,textarea{width:100%;padding:12px;margin:5px 0;border-radius:10px;border:1px solid var(--panel2);background:var(--panel);color:var(--txt);font-size:16px;font-family:inherit}
+textarea{min-height:110px}
+details{background:var(--panel);border-radius:14px;padding:12px 14px;margin:14px 0}
+summary{font-weight:600}
+footer{margin-top:28px;text-align:center;font-size:12px;color:var(--mut)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ---------- Default decks (question, answer) ----------
+const DEFAULTS=[
+{id:"elec",name:"Electrical",icon:"⚡",cards:[
+["Unit of electrical power?","Watt (W)"],
+["Ohm's law?","V = I × R"],
+["3-phase power formula (kW)?","P = √3 × V × I × PF ÷ 1000"],
+["Standard LV 3-phase supply in the UAE?","400/230 V, 50 Hz"],
+["Colour of the neutral conductor (IEC)?","Blue"],
+["Colour of the earth conductor?","Green/yellow"],
+["Line conductor colours in IEC 3-phase?","Brown, black, grey"],
+["Unit of capacitance?","Farad (F)"],
+["Unit of inductance?","Henry (H)"],
+["What does MCCB stand for?","Moulded Case Circuit Breaker"],
+["What does an RCD / ELCB protect against?","Earth leakage and electric shock"],
+["Typical RCD sensitivity for personal protection?","30 mA"],
+["Power factor is the ratio of...?","Real power (kW) to apparent power (kVA)"],
+["Unit of apparent power?","Volt-ampere (VA / kVA)"],
+["Energy in kWh equals?","kW × hours"],
+["What does a transformer do?","Steps voltage up or down using electromagnetic induction"],
+["Total resistance of resistors in series?","R = R1 + R2 + R3 ..."],
+["Total resistance of two resistors in parallel?","R = (R1 × R2) ÷ (R1 + R2)"],
+["What does IP stand for in IP65?","Ingress Protection"],
+["IP65 means?","Dust-tight and protected against water jets"]]},
+{id:"mep",name:"HVAC & Plumbing",icon:"🛠️",cards:[
+["1 ton of refrigeration (TR) equals?","12,000 BTU/h (about 3.517 kW)"],
+["BTU stands for?","British Thermal Unit"],
+["Purpose of a P-trap?","Holds a water seal that blocks sewer gas"],
+["FAD stands for?","Fresh Air Duct"],
+["EAD stands for?","Exhaust Air Duct"],
+["Purpose of a fire damper?","Stops fire and smoke spreading through ductwork"],
+["CHW stands for?","Chilled Water"],
+["Common pipe for hot and cold water supply?","PPR"],
+["Common pipe for drainage (DWV)?","uPVC"],
+["Unit used for water pressure?","bar (or kPa)"],
+["What does a non-return (check) valve do?","Allows flow in one direction only"],
+["What is the job of an expansion tank?","Absorbs water volume change as temperature changes"]]},
+{id:"ar",name:"Egyptian Arabic",icon:"🗣️",cards:[
+["Hello / Welcome","Ahlan"],
+["How are you? (to a man)","Ezzayak?"],
+["I'm fine, thank God","Ana kwayyes, el-hamdu lillah"],
+["Thank you","Shukran"],
+["Please","Min fadlak"],
+["How much is this?","Bekam da?"],
+["Yes","Aywa"],
+["No","La'"],
+["Now","Delwa'ty"],
+["Tomorrow","Bokra"],
+["Where?","Fein?"],
+["Why?","Leh?"],
+["What?","Eh?"],
+["Water","Mayya"],
+["Let's go!","Yalla!"],
+["Wait","Estanna"],
+["I don't understand","Mish fahem"],
+["OK / Fine","Tamam"]]},
+{id:"web",name:"Web Coding",icon:"💻",cards:[
+["HTML stands for?","HyperText Markup Language"],
+["Which tag makes the biggest heading?","<h1>"],
+["CSS is used for?","Styling and layout of web pages"],
+["Keyword for a constant in JavaScript?","const"],
+["Array method that adds an item at the end?","push()"],
+["What does === mean in JavaScript?","Strict equality (value and type)"],
+["localStorage is used to?","Save data in the browser between visits"],
+["JSON stands for?","JavaScript Object Notation"],
+["Select an element by its id?","document.getElementById()"],
+["Which tag creates a link?","<a href>"]]}
+];
+
+// ---------- State ----------
+const app=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function fresh(){return{decks:DEFAULTS.map(d=>({id:d.id,name:d.name,icon:d.icon,cards:d.cards.map((c,i)=>({id:d.id+i,q:c[0],a:c[1]}))})),prog:{},streak:0,best:0,last:"",today:0,uid:1}}
+function load(){try{const s=JSON.parse(localStorage.getItem("lc_state"));if(s&&Array.isArray(s.decks))return Object.assign(fresh(),s)}catch(e){}return fresh()}
+let S=load();
+function save(){try{localStorage.setItem("lc_state",JSON.stringify(S))}catch(e){}}
+const dayStr=o=>new Date(Date.now()-o*864e5).toDateString();
+function streakNow(){return(S.last===dayStr(0)||S.last===dayStr(1))?S.streak:0}
+function todayCount(){return S.last===dayStr(0)?S.today:0}
+function touch(){
+  if(S.last!==dayStr(0)){S.streak=(S.last===dayStr(1))?S.streak+1:1;S.last=dayStr(0);S.today=0}
+  S.today++;S.best=Math.max(S.best||0,S.streak);
+}
+const boxOf=c=>(S.prog[c.id]||{box:0}).box;
+const isM=c=>boxOf(c)>=3;
+function mark(c,ok){
+  const p=S.prog[c.id]||(S.prog[c.id]={box:0,n:0});
+  p.n++;p.box=ok?Math.min(4,p.box+1):0;touch();save();
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const deckById=id=>S.decks.find(d=>d.id===id);
+let sess=null;
+
+// ---------- Views ----------
+function topbar(href,label){return`<div class="top"><a class="back" href="${href}">‹ ${label}</a></div>`}
+function home(){
+  const total=S.decks.reduce((n,d)=>n+d.cards.length,0);
+  const mast=S.decks.reduce((n,d)=>n+d.cards.filter(isM).length,0);
+  app.innerHTML=`<div class="top"><h1 style="margin:0">Learn Cards</h1><a href="#/settings" style="font-size:24px">⚙️</a></div>
+  <div class="stats"><div><b>🔥 ${streakNow()}</b><span>day streak</span></div><div><b>${todayCount()}</b><span>cards today</span></div><div><b>${mast}/${total}</b><span>mastered</span></div></div>`+
+  S.decks.map(d=>{const m=d.cards.filter(isM).length,p=d.cards.length?Math.round(m*100/d.cards.length):0;
+    return`<a class="deck" href="#/deck/${d.id}"><span class="ic">${esc(d.icon)}</span><div><b>${esc(d.name)}</b><br><small>${m}/${d.cards.length} mastered</small><div class="bar"><i style="width:${p}%"></i></div></div></a>`}).join("")+
+  `<details><summary>➕ New deck</summary><input id="dn" placeholder="Deck name"><input id="di" placeholder="Emoji icon (optional)" maxlength="4"><div class="row"><button onclick="addDeck()">Create deck</button></div></details>
+  <footer>Sdmbrk Collections</footer>`;
+}
+function deckView(id){
+  const d=deckById(id);if(!d){location.hash="#/";return}
+  const m=d.cards.filter(isM).length,p=d.cards.length?Math.round(m*100/d.cards.length):0;
+  app.innerHTML=topbar("#/","Decks")+`<div class="center"><div class="big">${esc(d.icon)}</div><h2>${esc(d.name)}</h2><p class="mut">${d.cards.length} cards · ${m} mastered (${p}%)</p></div><div class="bar" style="margin:6px 0 20px"><i style="width:${p}%"></i></div>
+  <div class="row"><button onclick="go('#/study/${d.id}')">📖 Study</button></div>
+  <div class="row"><button class="ghost" onclick="go('#/quiz/${d.id}')">📝 Quiz</button></div>
+  <div class="row"><button class="ghost" onclick="go('#/manage/${d.id}')">✏️ Edit cards</button></div>
+  <p class="mut center" style="margin-top:18px;font-size:13px">Study focuses on cards you haven't mastered yet.</p>`;
+}
+function startStudy(d){sess={type:"study",deck:d.id,q:shuffle(d.cards).sort((a,b)=>boxOf(a)-boxOf(b)).slice(0,10),i:0,flip:false,right:0}}
+function studyView(id){
+  const d=deckById(id);if(!d||!d.cards.length){location.hash="#/deck/"+id;return}
+  if(!sess||sess.type!=="study"||sess.deck!==id)startStudy(d);
+  const s=sess;
+  if(s.i>=s.q.length)return doneView(d,s.right,s.q.length,"study");
+  const c=s.q[s.i];
+  app.innerHTML=topbar("#/deck/"+id,esc(d.name))+`<div class="prog">Card ${s.i+1} of ${s.q.length}</div>
+  <div class="card ${s.flip?"back":""}" onclick="flip()"><small>${s.flip?"ANSWER":"QUESTION"}</small><div>${esc(s.flip?c.a:c.q)}</div></div>`+
+  (s.flip?`<div class="row"><button class="no" onclick="answer(false)">✗ Missed</button><button class="ok" onclick="answer(true)">✓ Got it</button></div>`:`<div class="row"><button onclick="flip()">Show answer</button></div>`);
+}
+function flip(){if(sess&&sess.type==="study"){sess.flip=!sess.flip;route()}}
+function answer(ok){const s=sess;mark(s.q[s.i],ok);if(ok)s.right++;s.i++;s.flip=false;route()}
+function startQuiz(d){
+  const pool=shuffle(d.cards).slice(0,10);
+  sess={type:"quiz",deck:d.id,i:0,right:0,q:pool.map(c=>{
+    const wrong=shuffle(d.cards.filter(x=>x.a!==c.a)).filter((x,i,a)=>a.findIndex(y=>y.a===x.a)===i).slice(0,3).map(x=>x.a);
+    return{c,opts:shuffle([c.a,...wrong]),picked:null}})};
+}
+function quizView(id){
+  const d=deckById(id);
+  if(!d||d.cards.length<2){app.innerHTML=topbar("#/deck/"+id,"Back")+`<p class="center mut" style="margin-top:40px">Add at least 2 cards to take a quiz.</p>`;return}
+  if(!sess||sess.type!=="quiz"||sess.deck!==id)startQuiz(d);
+  const s=sess;
+  if(s.i>=s.q.length)return doneView(d,s.right,s.q.length,"quiz");
+  const it=s.q[s.i];
+  app.innerHTML=topbar("#/deck/"+id,esc(d.name))+`<div class="prog">Question ${s.i+1} of ${s.q.length} · Score ${s.right}</div><div class="q">${esc(it.c.q)}</div>`+
+  it.opts.map((o,k)=>{let cls="";if(it.picked!==null){if(o===it.c.a)cls="good";else if(k===it.picked)cls="bad"}
+    return`<button class="opt ${cls}" onclick="pick(${k})">${esc(o)}</button>`}).join("")+
+  (it.picked!==null?`<div class="row"><button onclick="nextQ()">${s.i+1===s.q.length?"Finish":"Next ›"}</button></div>`:"");
+}
+function pick(k){const it=sess.q[sess.i];if(it.picked!==null)return;it.picked=k;const ok=it.opts[k]===it.c.a;mark(it.c,ok);if(ok)sess.right++;route()}
+function nextQ(){sess.i++;route()}
+function doneView(d,r,t,kind){
+  const pct=t?Math.round(r*100/t):0;
+  app.innerHTML=`<div class="center"><div class="big">${pct>=80?"🏆":pct>=50?"👍":"💪"}</div><h2>${r} / ${t} correct</h2><p class="mut">${pct>=80?"Excellent work!":pct>=50?"Good progress — keep going.":"Practice makes perfect."}</p></div>
+  <div class="row"><button onclick="sess=null;route()">Again</button></div><div class="row"><button class="ghost" onclick="go('#/deck/${d.id}')">Back to deck</button></div>`;
+}
+function manageView(id){
+  const d=deckById(id);if(!d){location.hash="#/";return}
+  app.innerHTML=topbar("#/deck/"+id,esc(d.name))+`<h2>Edit cards</h2>
+  <details open><summary>➕ Add a card</summary><input id="nq" placeholder="Question"><input id="na" placeholder="Answer"><div class="row"><button onclick="addCard('${d.id}')">Save card</button></div></details>`+
+  d.cards.map(c=>`<div class="item"><div><b>${esc(c.q)}</b><br><small>${esc(c.a)}</small></div><button onclick="delCard('${d.id}','${c.id}')">✕</button></div>`).reverse().join("")+
+  `<details><summary>Deck settings</summary><input id="rn" value="${esc(d.name)}"><div class="row"><button class="ghost" onclick="renameDeck('${d.id}')">Rename</button><button class="no" onclick="delDeck('${d.id}')">Delete deck</button></div></details>`;
+}
+function settingsView(){
+  app.innerHTML=topbar("#/","Decks")+`<h2>Backup & settings</h2><p class="mut" style="font-size:14px">Copy this text to back up your decks and progress. Paste it back later to restore.</p>
+  <textarea id="bk" readonly>${esc(JSON.stringify(S))}</textarea><div class="row"><button class="ghost" onclick="copyBk()">Copy</button></div>
+  <details><summary>Restore from backup</summary><textarea id="rs" placeholder="Paste backup text here"></textarea><div class="row"><button onclick="restore()">Restore</button></div></details>
+  <div class="row"><button class="no" onclick="resetProg()">Reset progress</button></div><footer>Sdmbrk Collections · Learn Cards v2</footer>`;
+}
+
+// ---------- Actions ----------
+function go(h){location.hash=h}
+function addDeck(){
+  const n=document.getElementById("dn").value.trim();if(!n)return;
+  const ic=document.getElementById("di").value.trim()||"📚";
+  const id="u"+(S.uid++);S.decks.push({id,name:n,icon:ic,cards:[]});save();go("#/manage/"+id);
+}
+function addCard(id){
+  const q=document.getElementById("nq").value.trim(),a=document.getElementById("na").value.trim();if(!q||!a)return;
+  deckById(id).cards.push({id:"u"+(S.uid++),q,a});save();manageView(id);
+  document.getElementById("nq").focus();
+}
+function delCard(id,cid){const d=deckById(id);d.cards=d.cards.filter(c=>c.id!==cid);delete S.prog[cid];sess=null;save();manageView(id)}
+function renameDeck(id){const n=document.getElementById("rn").value.trim();if(!n)return;deckById(id).name=n;save();manageView(id)}
+function delDeck(id){if(!confirm("Delete this deck and all its cards?"))return;S.decks=S.decks.filter(d=>d.id!==id);sess=null;save();go("#/")}
+function copyBk(){const t=document.getElementById("bk");t.select();try{navigator.clipboard.writeText(t.value)}catch(e){document.execCommand("copy")}alert("Copied!")}
+function restore(){
+  try{
+    const o=JSON.parse(document.getElementById("rs").value);
+    if(!o||!Array.isArray(o.decks))throw 0;
+    o.decks=o.decks.filter(d=>d&&d.id&&Array.isArray(d.cards)).map(d=>({id:String(d.id),name:String(d.name||"Deck"),icon:String(d.icon||"📚"),cards:d.cards.filter(c=>c&&c.id).map(c=>({id:String(c.id),q:String(c.q),a:String(c.a)}))}));
+    S=Object.assign(fresh(),o);save();alert("Restored!");go("#/");
+  }catch(e){alert("That doesn't look like a valid backup.")}
+}
+function resetProg(){if(!confirm("Reset all progress and streak? Your decks are kept."))return;S.prog={};S.streak=0;S.best=0;S.last="";S.today=0;save();go("#/")}
+
+// ---------- Router ----------
+function route(){
+  const p=(location.hash.slice(1)||"/").split("/"),a=p[1]||"",id=p[2]||"";
+  if(a!=="study"&&a!=="quiz")sess=null;
+  if(a==="deck")deckView(id);
+  else if(a==="study")studyView(id);
+  else if(a==="quiz")quizView(id);
+  else if(a==="manage")manageView(id);
+  else if(a==="settings")settingsView();
+  else home();
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+route();
+</script>
+</body>
+</html>
